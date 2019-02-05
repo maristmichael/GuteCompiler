@@ -5,5 +5,4 @@ class Token():
         self.start_position = None
         self.end_position = None
         
-
     
