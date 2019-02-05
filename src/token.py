@@ -1,8 +1,6 @@
 class Token():
-    def __init__(self, name, lexeme):
-        self.name = name
-        self.lexeme = lexeme
-        self.start_position = None
-        self.end_position = None
-        
-    
+    def __init__(self,type_,value,start,end):
+        self.type_ = type_
+        self.value = value
+        self.start_position = start
+        self.end_position = end
