@@ -5,10 +5,9 @@ class Token():
         self.start_position = start
         self.end_position = end
 
-def valid_tokens():
+def token_kinds():
     # Token type = {regex:priority}
     return {
-
         'T_keyword' : {r'^if|while|print|int|string|boolean|true|false$' : 1},
 
         # Identifiers are 1 character long
@@ -21,8 +20,9 @@ def valid_tokens():
         'T_digit' : {r'^[0-9]$' : 4},
 
         # Chars are of length 1
-        # 'T_char' : {r'^[a-z]$': 5},
-
-        # Chars including whitespace if dealing with string expressions | Can Space be a CHAR????
-        'T_char_space' : {r'^[a-z]|\s$': 5}
+        'T_char' : {
+            r'^[a-z]$': 5,
+            # Chars including whitespace if lexing chars inside string
+            r'^[a-z]|\s$': 5
+        }
     }

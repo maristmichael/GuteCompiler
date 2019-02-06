@@ -1,7 +1,8 @@
 import re
 from tokens import *
+from utilities import *
 
-VALID_TOKENS = valid_tokens()
+VALID_TOKENS = token_kinds()
 
 LEXEMES = {  
     # Keywords
@@ -25,11 +26,17 @@ LEXEMES = {
     ')':'T_RParen',
 }
 
+# Takes in a string input and returns 
 def lex(input_):
-    for token in VALID_TOKENS:
-        pattern = ''.join(VALID_TOKENS[token].keys())
+    programs = parsePrograms(input_)
 
-        match = re.match(pattern,input_)
+    # input_ = [char for char in input_]
 
-        if match is not None:
-            print(token,repr(match.group(0)))
+    # for token in VALID_TOKENS:
+    #     pattern = ''.join(VALID_TOKENS[token].keys())
+
+    #     match = re.match(pattern,input_)
+
+    #     if match is not None:
+    #         print(token,repr(match.group(0)))
+    print(programs)
