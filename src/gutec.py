@@ -2,7 +2,7 @@ def main():
     f = open('dumb.txt', 'r')
     data = f.read()
     f.close()
-    print(type(data))
+    print(data)
 
     
 if __name__ == '__main__':
