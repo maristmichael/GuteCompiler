@@ -26,11 +26,10 @@ LEXEMES = {
 }
 
 def lex(input_):
-    print
     for token in VALID_TOKENS:
         pattern = ''.join(VALID_TOKENS[token].keys())
 
         match = re.match(pattern,input_)
 
         if match is not None:
-            print(token,match.group(0))
+            print(token,repr(match.group(0)))

@@ -6,7 +6,7 @@ class Token():
         self.end_position = end
 
 def valid_tokens():
-    # Token name = {regex:priority}
+    # Token type = {regex:priority}
     return {
 
         'T_keyword' : {r'^if|while|print|int|string|boolean|true|false$' : 1},
