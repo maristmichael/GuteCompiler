@@ -1,4 +1,4 @@
-import re
+# import re
 from tokens import *
 from utilities import *
 
@@ -28,15 +28,22 @@ LEXEMES = {
 
 # Takes in a string input and returns 
 def lex(input_):
+    line_number = 1
     programs = parsePrograms(input_)
 
-    # input_ = [char for char in input_]
+    for i, pgm in enumerate(programs):
+        print(f'Program:{i+1}')
+        # print(f'    {repr(pgm)}')
+        characters = [char for char in pgm]
 
-    # for token in VALID_TOKENS:
-    #     pattern = ''.join(VALID_TOKENS[token].keys())
+        buffer = ''
+        for char in characters:
+            findMatches(char,VALID_TOKENS)
+            # buffer += char
 
-    #     match = re.match(pattern,input_)
 
-    #     if match is not None:
-    #         print(token,repr(match.group(0)))
-    print(programs)
+
+        
+        # print(characters)
+        # print('')
+
