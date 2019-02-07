@@ -28,22 +28,23 @@ LEXEMES = {
 
 # Takes in a string input and returns 
 def lex(input_):
+
+    tokens = []
     line_number = 1
     programs = parsePrograms(input_)
 
     for i, pgm in enumerate(programs):
-        print(f'Program:{i+1}')
+        if len(programs) > 1:
+            print(f'Program:{i+1}')
         # print(f'    {repr(pgm)}')
         characters = [char for char in pgm]
+        scope = []
+        buffer = []
 
-        buffer = ''
-        for char in characters:
-            findMatches(char,VALID_TOKENS)
-            # buffer += char
+        # Loop as long as we have characters or the buffer is not empty
+        while buffer or characters:
+            if characters:
+                buffer.append(characters.pop(0))
 
-
-
-        
-        # print(characters)
-        # print('')
+            findMatches(buffer,VALID_TOKENS)
 
