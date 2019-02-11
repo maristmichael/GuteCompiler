@@ -5,6 +5,9 @@ class Token():
         self.line_num = line_num
         self.col_num = col_num
 
+    def __repr__(self):
+        return self.type_
+
 def token_kinds():
     # { kind : (regex,priority) }
     return {

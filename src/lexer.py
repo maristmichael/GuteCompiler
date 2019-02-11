@@ -1,5 +1,5 @@
 # import re
-from tokens import *
+from tokens import token_kinds
 from utilities import *
 
 VALID_TOKENS = token_kinds()
@@ -63,8 +63,10 @@ def lex(input_):
                 print('deleting tab')
                 continue
 
-            if next_char in VALID_SYMBOLS or not characters:
+            if next_char in VALID_SYMBOLS and buffer or not characters:
+                tokens.append(consumeToken(matches, LEXEMES))
                 print('Consuming a token')
+                print(tokens)
                 matches = []
                 buffer = []
 
@@ -76,8 +78,8 @@ def lex(input_):
 
 
 
-            string_ = ''.join(buffer)
-            findMatches(string_, VALID_TOKENS,matches)
+            buffer_string = ''.join(buffer)
+            findMatches(buffer_string, VALID_TOKENS, matches,line,col,last_match_idx)
           
                 # print(matches)
 
