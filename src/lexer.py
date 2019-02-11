@@ -31,12 +31,12 @@ VALID_SYMBOLS = tuple(LEXEMES.keys())[7::]
 def lex(input_):
     tokens = []
     line,col = 0,0
-    last_match_idx = -1
     programs = parsePrograms(input_)
 
     for i, pgm in enumerate(programs):
         characters = [char for char in pgm]
         matches = []
+        last_match_idx = -1
         # scope = []
         buffer = []
 
@@ -53,22 +53,24 @@ def lex(input_):
             if charRegex(VALID_TOKENS) and next_char == " ":
                 col += 1
                 del characters[0]
-                print('deleting space')
                 continue
 
             if next_char == "\n":
                 line += 1
                 col = 0
                 del characters[0]
-                print('deleting tab')
                 continue
 
             if next_char in VALID_SYMBOLS and buffer or not characters:
+                print(buffer)
                 tokens.append(consumeToken(matches, LEXEMES))
-                print('Consuming a token')
-                print(tokens)
-                matches = []
+                del buffer[0:len(tokens[0].value)]
+                characters = buffer + characters
                 buffer = []
+                print('-----Consuming a token')
+                print(buffer)
+                # print(tokens)
+                matches = []
 
             if characters:
                 col += 1
@@ -79,7 +81,7 @@ def lex(input_):
 
 
             buffer_string = ''.join(buffer)
-            findMatches(buffer_string, VALID_TOKENS, matches,line,col,last_match_idx)
+            findMatches(buffer_string, VALID_TOKENS, matches,line,col)
           
                 # print(matches)
 

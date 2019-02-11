@@ -11,7 +11,7 @@ class Token():
 def token_kinds():
     # { kind : (regex,priority) }
     return {
-        'T_keyword' : (r'^if|while|print|int|string|boolean|true|false$', 1),
+        'T_keyword': (r'^(if)(?![\s\S])|(while)(?![\s\S])|(print)(?![\s\S])|(int)(?![\s\S])|(string)(?![\s\S])|(boolean)(?![\s\S])|(true)(?![\s\S])|(false)(?![\s\S])$', 1),
 
         # Identifiers are 1 character long
         'T_ID' : (r'^[a-z]$', 2),

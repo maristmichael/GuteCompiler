@@ -11,7 +11,7 @@ def parsePrograms(input_):
 
     return programs
 
-def findMatches(string_,valid_tokens,matches,line,col,idx):
+def findMatches(string_,valid_tokens,matches,line,col):
     print('matching:', repr(string_))
     # print(matches)
     for token in valid_tokens:
@@ -20,7 +20,6 @@ def findMatches(string_,valid_tokens,matches,line,col,idx):
         match = re.match(pattern,string_)
 
         if match is not None:
-            idx += 1
             matches.append((token,match.group(0),line,col))
     print(matches)
 
