@@ -10,9 +10,9 @@ In a terminal or command line, navigate to the directory of the project
 
 Give executable permissions to the setup.sh file with `chmod +x setup.sh` to make life easy for you
 
-After the Python3.7 version check, run the command `. ./setup.sh` 
+Run the command `. ./setup.sh` for a quick the Python3.7 version check, and installation
 
-The installation and setup will occur and after you're ready to use my compiler
+After all that magic, you're ready to use my compiler
 
 Type `gutec -f path_to_a_file` to compile a file
 
