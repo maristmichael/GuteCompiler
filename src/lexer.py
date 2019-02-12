@@ -123,7 +123,7 @@ def lex(input_):
                             break
 
                         token = consumeToken(matches, LEXEMES, valid_tokens)
-                        STDOUT(f'LEXER > {token}-[{token.value}]')
+                        STDOUT(f'LEXER > {token}-[{token.value}] on line {token.line_num}')
                         tokens.append(token)
                         indexes_to_del = len(tokens[-1].value)
 
@@ -165,7 +165,7 @@ def lex(input_):
                     break
                 # print(matches,buffer)
                 token = consumeToken(matches, LEXEMES, valid_tokens)
-                STDOUT(f'LEXER > {token}-[{token.value}]')
+                STDOUT(f'LEXER > {token}-[{token.value}] on line {token.line_num}')
                 tokens.append(token)
                 indexes_to_del = len(tokens[-1].value)
 
