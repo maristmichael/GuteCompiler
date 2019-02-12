@@ -8,6 +8,7 @@ LEXEMES = {
     'while':'T_K_while',
     'print':'T_K_print',
     'int':'T_K_int',
+    'if':'T_K_if',
     'string':'T_K_string',
     'boolean':'T_K_boolean',
     'true':'T_K_true',
@@ -23,6 +24,7 @@ LEXEMES = {
     '}':'T_RBrace',
     '(':'T_LParen',
     ')':'T_RParen',
+    '$':'T_EOF'
 }
 
 VALID_SYMBOLS = tuple(LEXEMES.keys())[7::]
@@ -30,12 +32,15 @@ VALID_SYMBOLS = tuple(LEXEMES.keys())[7::]
 # Takes in a string input and returns 
 def lex(input_):
     tokens = []
-    line,col = 0,0
+    line,col = 1,1
     programs = parsePrograms(input_)
 
+
+
     for i, pgm in enumerate(programs):
-        characters = [char for char in pgm]
+        characters = [*pgm]
         matches = []
+        last_match_len = 0
         last_match_idx = -1
         # scope = []
         buffer = []
@@ -64,11 +69,13 @@ def lex(input_):
             if next_char in VALID_SYMBOLS and buffer or not characters:
                 print(buffer)
                 tokens.append(consumeToken(matches, LEXEMES))
-                del buffer[0:len(tokens[0].value)]
+                print('-----added new token, current:', tokens)
+                del_upto = len(tokens[-1].value)
+                print(buffer[0:del_upto])
+                del buffer[0:del_upto]
                 characters = buffer + characters
                 buffer = []
-                print('-----Consuming a token')
-                print(buffer)
+                print('-----Consuming a token & clearing buffer')
                 # print(tokens)
                 matches = []
 
@@ -82,6 +89,27 @@ def lex(input_):
 
             buffer_string = ''.join(buffer)
             findMatches(buffer_string, VALID_TOKENS, matches,line,col)
+            if matches:
+                last_matched = matches[-1:][0]
+                last_match_len = len(matches)
+
+            if last_matched[0] == 'T_symbol' and characters:
+                print('looking ahead for double symbol')
+                print(repr(buffer_string+characters[0]))
+                findMatches(buffer_string+characters[0],VALID_TOKENS, matches,line,col)
+                if last_match_len != len(matches):
+                    if last_matched == matches[-1:][0]:
+                        print('same symbol curr,',matches)
+                        matches.remove(matches[-1:][0])
+                        print('after', matches)
+                    print('diff symbol, curr',matches)
+                    matches.remove(matches[-2:][0])
+                    print(buffer)
+                    buffer.append(characters.pop(0))
+                    col += 1
+                    print('after', matches)
+
+                
           
                 # print(matches)
 
