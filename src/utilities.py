@@ -1,15 +1,24 @@
 import re
 from tokens import *
 from lexer import *
+import click
+
 def parsePrograms(input_):
     input_ = input_.rstrip()
     eop_count = input_.count('$')
-    programs = re.split('($)',input_)
+    programs = input_.split('$')
+
+    for i in range(eop_count):
+        programs[i] += '$'
+
+
+    # programs = re.split('$',input_)
+    # print(programs)
     programs = tuple(filter(None, programs))
     program_count = len(programs)
 
     if eop_count is 0 or eop_count != program_count:
-        print("Warning: Missing EOP '$'")
+        STDWARN("Warning: Missing EOP '$'")
 
     return programs
 
@@ -96,3 +105,13 @@ def consumeToken(matches,lexemes,valid_tokens):
         
         # We have to get the highest priority match
 
+def STDOUT(message):
+    click.echo(click.style(message, fg='green'))
+
+
+def STDERR(message):
+    click.echo(click.style(message, fg='red'))
+
+
+def STDWARN(message):
+    click.echo(click.style(message, fg='yellow'))

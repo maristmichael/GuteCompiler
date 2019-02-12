@@ -2,7 +2,6 @@
 from tokens import token_kinds
 from utilities import *
 
-
 # Takes in a string input and returns 
 def lex(input_):
     valid_tokens = token_kinds()
@@ -49,7 +48,7 @@ def lex(input_):
         buffer = []
 
         if len(programs) > 1:
-            print(f'Program:{i+1}')
+            STDOUT(f'Program: {i+1}')
 
 
         # for char in characters:
@@ -62,13 +61,11 @@ def lex(input_):
 
                 if next_two_chars == '/*' or next_two_chars == '*/':
                     del characters[0:2]
-                    print('comments......')
                     ignore_mode = not ignore_mode
                     continue
 
                 elif ignore_mode and characters:
                     col += 1
-                    print('skipping......', characters[0])
                     del characters[0]
                     continue
                 # Look ahead and ignore white space if we are not in a string
@@ -100,46 +97,47 @@ def lex(input_):
                         
 
                         if next_char and (buffer_str+next_char) in VALID_SYMBOLS:
-                            print('looking ahead for double symbol')
-                            print(repr(buffer_str+next_char))
+                            # print('looking ahead for double symbol')
+                            # print(repr(buffer_str+next_char))
                             findMatches(buffer_str+next_char,valid_tokens, matches, line, col)
                             if last_match_len is 0:
                                  buffer.append(characters.pop(0))
                             elif last_match_len != len(matches):
                                 if last_matched == matches[-1:][0]:
-                                    print('same symbol curr,', matches)
+                                    # print('same symbol curr,', matches)
                                     matches.remove(matches[-1:][0])
-                                    print('after', matches)
-                                print('diff symbol, curr', matches)
+                                    # print('after', matches)
+                                # print('diff symbol, curr', matches)
                                 matches.remove(matches[-2:][0])
-                                print(buffer)
+                                # print(buffer)
                                 buffer.append(characters.pop(0))
                                 col += 1
-                                print('after', matches)
+                                # print('after', matches)
                         continue
                     else:
-                        print('-----stopping at:', next_char)
-                        print('-----buffer:', buffer)
+                        # print('-----stopping at:', next_char)
+                        # print('-----buffer:', buffer)
 
-                        tokens.append(consumeToken(matches, LEXEMES, valid_tokens))
+                        if not matches and buffer:
+                            STDERR('ERROR: invalid token')
+                            break
+
+                        token = consumeToken(matches, LEXEMES, valid_tokens)
+                        STDOUT(f'LEXER > {token}-[{token.value}]')
+                        tokens.append(token)
                         indexes_to_del = len(tokens[-1].value)
 
-                      
-
-                        print('~~~~~~~~~~~~~`!!!!!!!!!!deleting:', buffer[0:indexes_to_del])
-
                         if buffer[0:indexes_to_del][0] == '"':
-                            print('switching chars')
                             valid_tokens = switchCharRegex(valid_tokens)
+
                         del buffer[0:indexes_to_del]
                         characters = buffer + characters
-                        print("{{{remaining chars: ", characters)
                         buffer = []
                         matches = []
 
-                        print('-----Made a token & clearing buffer')
-                        print('-----tokens:', tokens)
-                        print('-------------------------------------')
+                        # print('-----Made a token & clearing buffer')
+                        # print('-----tokens:', tokens)
+                        # print('-------------------------------------')
                         continue
         
 
@@ -163,10 +161,12 @@ def lex(input_):
             else:
                 # print('no chars')
                 if not matches and buffer:
-                    print('error, invalid token')
+                    STDERR('ERROR: invalid token')
                     break
                 # print(matches,buffer)
-                tokens.append(consumeToken(matches, LEXEMES, valid_tokens))
+                token = consumeToken(matches, LEXEMES, valid_tokens)
+                STDOUT(f'LEXER > {token}-[{token.value}]')
+                tokens.append(token)
                 indexes_to_del = len(tokens[-1].value)
 
                 
