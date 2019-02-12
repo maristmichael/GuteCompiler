@@ -2,6 +2,7 @@ import re
 from tokens import *
 from lexer import *
 def parsePrograms(input_):
+    input_ = input_.rstrip()
     eop_count = input_.count('$')
     programs = re.split('($)',input_)
     programs = tuple(filter(None, programs))
@@ -13,6 +14,8 @@ def parsePrograms(input_):
     return programs
 
 def findMatches(string_,valid_tokens,matches,line,col):
+    changed = False
+    # print('~~~~~~~Analyzing', repr(string_))
     # print(matches)
     for token in valid_tokens:
         pattern = ''.join(valid_tokens[token][0])
@@ -20,9 +23,13 @@ def findMatches(string_,valid_tokens,matches,line,col):
         match = re.match(pattern,string_)
 
         if match is not None:
-            print('matched:', repr(string_), token)
+            changed = True
+            # print('matched:', repr(string_), token)
             matches.append((token,match.group(0),line,col))
-            print('all matches:',matches)
+
+    
+    # if changed:
+    #     print('found these',matches)
 
 
 # Switches the regex for chars to now find whitespaces, and increase the priority for chars
@@ -33,7 +40,7 @@ def switchCharRegex(valid_tokens):
     char_space_regex = r'^[a-z ]$'
 
     if valid_tokens['T_char'][0] == char_regex:
-        print('swapped')
+        # print('swapped')
         valid_tokens = {
             'T_keyword': (r'^(if)(?![\s\S])|(while)(?![\s\S])|(print)(?![\s\S])|(int)(?![\s\S])|(string)(?![\s\S])|(boolean)(?![\s\S])|(true)(?![\s\S])|(false)(?![\s\S])$', 1),
             'T_ID': (r'^[a-z]$', 5),
@@ -60,14 +67,14 @@ def consumeToken(matches,lexemes,valid_tokens):
     match_priorities = [valid_tokens[kind][1] for kind in match_kinds]
 
 
-    print(match_kinds,match_literals,match_lengths, match_priorities)
+    # print(match_kinds,match_literals,match_lengths, match_priorities)
 
 
 
     longest_match_i = match_lengths.index(max(match_lengths))
     longest_match = match_literals[longest_match_i]
-    print('longest m:', longest_match)
-    print('literals:', match_literals)
+    # print('longest m:', longest_match)
+    # print('literals:', match_literals)
 
 
     # If there's only one longest match
@@ -81,9 +88,9 @@ def consumeToken(matches,lexemes,valid_tokens):
 
         highest_priority_i = match_priorities.index(min(match_priorities))
         highest_priority = match_literals[highest_priority_i]
-        print('highest priority indx:', highest_priority_i)
-        print('highest priority:', highest_priority)
-        print('returning highest priority is ', matches[highest_priority_i], highest_priority)
+        # print('highest priority indx:', highest_priority_i)
+        # print('highest priority:', highest_priority)
+        # print('returning highest priority is ', matches[highest_priority_i], highest_priority)
 
         return Token(matches[highest_priority_i][0], highest_priority, matches[highest_priority_i][2], matches[highest_priority_i][3])
         

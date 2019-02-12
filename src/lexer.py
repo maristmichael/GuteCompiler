@@ -41,6 +41,7 @@ def lex(input_):
 
 
     for i, pgm in enumerate(programs):
+        ignore_mode = False
         characters = [*pgm]
         matches = []
         last_match_len = 0
@@ -53,64 +54,135 @@ def lex(input_):
 
         # for char in characters:
         while buffer or characters:
-            next_char = next(iter(characters), None)
-            print('next char is....',repr(next_char))
+            if characters:
+                next_char = characters[0] if 0 < len(characters) else None
+                next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
+                buffer_str = ''.join(buffer)
+                # print('next char: ', repr(next_char))
 
-            # Look ahead and ignore white space if we are not in a string
-            if charRegex(valid_tokens) and next_char == ' ':
-                col += 1
-                del characters[0]
-                continue
+                if next_two_chars == '/*' or next_two_chars == '*/':
+                    del characters[0:2]
+                    print('comments......')
+                    ignore_mode = not ignore_mode
+                    continue
 
-            if next_char == '\n':
-                line += 1
-                col = 0
-                del characters[0]
-                continue
+                elif ignore_mode and characters:
+                    col += 1
+                    print('skipping......', characters[0])
+                    del characters[0]
+                    continue
+                # Look ahead and ignore white space if we are not in a string
+                elif charRegex(valid_tokens) and next_char == ' ':
+                    col += 1
+                    del characters[0]
+                    continue
+                    # continue
 
-            if next_char in VALID_SYMBOLS and buffer or not characters:
-                print(buffer)
-                tokens.append(consumeToken(matches, LEXEMES,valid_tokens))
-                print('-----added new token, current:', tokens)
-                del_upto = len(tokens[-1].value)
-                print(buffer[0:del_upto])
-                # print(valid_tokens, '########')
-                if buffer[0:del_upto][0] == '"':
-                    valid_tokens = switchCharRegex(valid_tokens)
+                elif next_char == '\n':
+                    line += 1
+                    col = 0
+                    del characters[0]
+                    continue
+
+                elif next_char in VALID_SYMBOLS or  next_two_chars in VALID_SYMBOLS or len(characters) is 0:
+                    if not buffer:
+                        buffer.append(characters.pop(0))
+                        next_char = characters[0] if 0 < len(characters) else None
+                        next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
+                        buffer_str = ''.join(buffer)
+
+                        findMatches(buffer_str, valid_tokens,matches, line, col)
+                        last_matched = matches[-1:][0] if 0 < len(matches) else None
+
+                        # last_matched = matches[-1:][0]
+                        last_match_len = len(matches)
+
+                        
+
+                        if next_char and (buffer_str+next_char) in VALID_SYMBOLS:
+                            print('looking ahead for double symbol')
+                            print(repr(buffer_str+next_char))
+                            findMatches(buffer_str+next_char,valid_tokens, matches, line, col)
+                            if last_match_len is 0:
+                                 buffer.append(characters.pop(0))
+                            elif last_match_len != len(matches):
+                                if last_matched == matches[-1:][0]:
+                                    print('same symbol curr,', matches)
+                                    matches.remove(matches[-1:][0])
+                                    print('after', matches)
+                                print('diff symbol, curr', matches)
+                                matches.remove(matches[-2:][0])
+                                print(buffer)
+                                buffer.append(characters.pop(0))
+                                col += 1
+                                print('after', matches)
+                        continue
+                    else:
+                        print('-----stopping at:', next_char)
+                        print('-----buffer:', buffer)
+
+                        tokens.append(consumeToken(matches, LEXEMES, valid_tokens))
+                        indexes_to_del = len(tokens[-1].value)
+
+                      
+
+                        print('~~~~~~~~~~~~~`!!!!!!!!!!deleting:', buffer[0:indexes_to_del])
+
+                        if buffer[0:indexes_to_del][0] == '"':
+                            print('switching chars')
+                            valid_tokens = switchCharRegex(valid_tokens)
+                        del buffer[0:indexes_to_del]
+                        characters = buffer + characters
+                        print("{{{remaining chars: ", characters)
+                        buffer = []
+                        matches = []
+
+                        print('-----Made a token & clearing buffer')
+                        print('-----tokens:', tokens)
+                        print('-------------------------------------')
+                        continue
+        
+
+                    # continue
+
+
+                next_char = characters[0] if 0 < len(characters) else None
+                # print('Popping to buffer, next char: ', repr(next_char))
+                # print('Chars left: ', repr(characters))
+                buffer.append(characters.pop(0))
+                buffer_str = ''.join(buffer)
+                # next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
+
+                
                     # print(valid_tokens)
-                del buffer[0:del_upto]
+                findMatches(buffer_str, valid_tokens, matches, line, col)
+                if matches:
+                    last_matched = matches[-1:][0]
+                    last_match_len = len(matches)
+                
+            else:
+                # print('no chars')
+                if not matches and buffer:
+                    print('error, invalid token')
+                    break
+                # print(matches,buffer)
+                tokens.append(consumeToken(matches, LEXEMES, valid_tokens))
+                indexes_to_del = len(tokens[-1].value)
+
+                
+
+                # print('!!!!!!!!!!deleting:', buffer[0:indexes_to_del])
+
+                if buffer[0:indexes_to_del] == '"':
+                    valid_tokens = switchCharRegex(valid_tokens)
+
+                del buffer[0:indexes_to_del]
                 characters = buffer + characters
+                # print("{{{remaining chars: ", characters)
                 buffer = []
-                print('-----Consuming a token & clearing buffer')
-                # print(tokens)
                 matches = []
 
-            if characters:
-                col += 1
-                buffer.append(characters.pop(0))
-
-            
-
-
-
-            buffer_string = ''.join(buffer)
-            findMatches(buffer_string, valid_tokens, matches,line,col)
-            if matches:
-                last_matched = matches[-1:][0]
-                last_match_len = len(matches)
-
-            if last_matched[0] == 'T_symbol' and characters:
-                print('looking ahead for double symbol')
-                print(repr(buffer_string+characters[0]))
-                findMatches(buffer_string+characters[0],valid_tokens, matches,line,col)
-                if last_match_len != len(matches):
-                    if last_matched == matches[-1:][0]:
-                        print('same symbol curr,',matches)
-                        matches.remove(matches[-1:][0])
-                        print('after', matches)
-                    print('diff symbol, curr',matches)
-                    matches.remove(matches[-2:][0])
-                    print(buffer)
-                    buffer.append(characters.pop(0))
-                    col += 1
-                    print('after', matches)
+                # print('-----Made a token & clearing buffer')
+                # print('-----tokens:', tokens)
+                # print('-------------------------------------')
+                # print(characters,matches)
