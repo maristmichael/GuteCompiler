@@ -16,5 +16,4 @@ else
     echo "Please install Python3.7"
     echo "If you have brew, you can run: 'brew upgrade python3' in the terminal,"
     echo "  or download python3.7 directly from the Python website"
-
 fi
