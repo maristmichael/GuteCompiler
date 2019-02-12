@@ -9,7 +9,6 @@ def main():
 
     # Give the lexer the input
     lexer.lex(input_)
-
     
 if __name__ == '__main__':
     main()

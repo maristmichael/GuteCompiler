@@ -31,158 +31,166 @@ def lex(input_):
         '$': 'T_EOF'
     }
 
-    VALID_SYMBOLS = tuple(LEXEMES.keys())[7::]
+    VALID_SYMBOLS = tuple(LEXEMES.keys())[8::]
 
     tokens = []
     line,col = 1,1
     programs = parsePrograms(input_)
 
-
-
+    # Iterate through every program given as input
     for i, pgm in enumerate(programs):
-        ignore_mode = False
+        comment_mode = False
         characters = [*pgm]
         matches = []
-        last_match_len = 0
-        last_match_idx = -1
         buffer = []
+        last_match_len = 0
+        # last_match_idx = -1
 
+        # If more than one program make note of it when lexing
         if len(programs) > 1:
             STDOUT(f'Program: {i+1}')
 
-
-        # for char in characters:
+        # As long as we have something in the buffer or characters, try to generate tokens
         while buffer or characters:
             if characters:
                 next_char = characters[0] if 0 < len(characters) else None
                 next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
-                buffer_str = ''.join(buffer)
-                # print('next char: ', repr(next_char))
 
+                # Concatenate the buffer list to one string to use regex on it
+                buffer_str = ''.join(buffer)
+
+                # Toggle comment mode when we detect the apprpiate characters
                 if next_two_chars == '/*' or next_two_chars == '*/':
                     del characters[0:2]
-                    ignore_mode = not ignore_mode
+                    comment_mode = not comment_mode
                     continue
 
-                elif ignore_mode and characters:
+                # Ignore anything if inside a comment block
+                elif comment_mode and characters:
                     col += 1
                     del characters[0]
                     continue
-                # Look ahead and ignore white space if we are not in a string
+
+                # Look ahead and ignore whitespace if we are not inside a two quotes (string)
                 elif charRegex(valid_tokens) and next_char == ' ':
                     col += 1
                     del characters[0]
                     continue
-                    # continue
 
+                # Ignore newlines as characters
                 elif next_char == '\n':
                     line += 1
                     col = 0
                     del characters[0]
                     continue
 
-                elif next_char in VALID_SYMBOLS or  next_two_chars in VALID_SYMBOLS or len(characters) is 0:
+
+                # If the next 1-2 characters are recognized symbols or we have no characters, try to generate a token
+                elif next_char in VALID_SYMBOLS or next_two_chars in VALID_SYMBOLS or len(characters) is 0:
+                    # If nothing is in the buffer, try and find a lexeme match for the upcoming symbol
                     if not buffer:
+                        # Add the symbol to the buffer
                         buffer.append(characters.pop(0))
-                        next_char = characters[0] if 0 < len(characters) else None
-                        next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
                         buffer_str = ''.join(buffer)
 
-                        findMatches(buffer_str, valid_tokens,matches, line, col)
-                        last_matched = matches[-1:][0] if 0 < len(matches) else None
+                        next_char = characters[0] if 0 < len(characters) else None
+                        next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
 
-                        # last_matched = matches[-1:][0]
+                        # Find any lexeme matches
+                        findMatches(buffer_str, valid_tokens,matches, line, col)
+
+                        last_matched = matches[-1:][0] if 0 < len(matches) else None
                         last_match_len = len(matches)
 
-                        
-
-                        if next_char and (buffer_str+next_char) in VALID_SYMBOLS:
-                            # print('looking ahead for double symbol')
-                            # print(repr(buffer_str+next_char))
+                        # If the next character is also a symbol, try and see if it could lead to a symbol of size 2 by concatenating it with the symbol we just found
+                        if next_char in VALID_SYMBOLS and buffer_str+next_char in VALID_SYMBOLS:
                             findMatches(buffer_str+next_char,valid_tokens, matches, line, col)
+
+                            # If there's no match for a 2 character symbol, add the original one character symbol we found to the buffer
                             if last_match_len is 0:
-                                 buffer.append(characters.pop(0))
+                                buffer.append(characters.pop(0))
+
+                            # If we found a 2 character symbol, remove the 1 character symbol from our lexeme matches list
                             elif last_match_len != len(matches):
-                                if last_matched == matches[-1:][0]:
-                                    # print('same symbol curr,', matches)
-                                    matches.remove(matches[-1:][0])
-                                    # print('after', matches)
-                                # print('diff symbol, curr', matches)
                                 matches.remove(matches[-2:][0])
-                                # print(buffer)
                                 buffer.append(characters.pop(0))
                                 col += 1
-                                # print('after', matches)
-                        continue
-                    else:
-                        # print('-----stopping at:', next_char)
-                        # print('-----buffer:', buffer)
 
+                        # Go back to the top of the loop
+                        continue
+                    
+                    # If there's something in the buffer, lets generate the token from one of our lexeme matches
+                    else:
+
+                        # If we dont have any matches or anything in the buffer, we don't have a supported character for our language
                         if not matches and buffer:
                             STDERR('ERROR: invalid token')
                             break
 
-                        token = consumeToken(matches, LEXEMES, valid_tokens)
+                        # Generate one token given all the matches we found
+                        token = generateToken(matches, LEXEMES, valid_tokens)
                         STDOUT(f'LEXER > {token}-[{token.value}] on line {token.line_num}')
                         tokens.append(token)
+
+                        # Keep track of how long our token was to remove its characters from the buffer
                         indexes_to_del = len(tokens[-1].value)
 
+                        # If we are removing a quote, toggle the function to enable/disable whitespace matching for characters
                         if buffer[0:indexes_to_del][0] == '"':
                             valid_tokens = switchCharRegex(valid_tokens)
 
+                        # Purge those indexes wherein the characters of the token are apart of
                         del buffer[0:indexes_to_del]
+
+                        # Prepend whatever's left in the buffer to start this whole process again
                         characters = buffer + characters
+
+                        # Reset our buffer and found matches
                         buffer = []
                         matches = []
-
-                        # print('-----Made a token & clearing buffer')
-                        # print('-----tokens:', tokens)
-                        # print('-------------------------------------')
                         continue
-        
+      
 
-                    # continue
-
-
+                # If our next character isn't a symbol, take a character and try to find a match
                 next_char = characters[0] if 0 < len(characters) else None
-                # print('Popping to buffer, next char: ', repr(next_char))
-                # print('Chars left: ', repr(characters))
+                
                 buffer.append(characters.pop(0))
                 buffer_str = ''.join(buffer)
-                # next_two_chars = ''.join(characters[0:2]) if 2 < len(characters) else None
-
                 
-                    # print(valid_tokens)
                 findMatches(buffer_str, valid_tokens, matches, line, col)
+
+                # Keep track of what we found last, and the length of that match
                 if matches:
                     last_matched = matches[-1:][0]
                     last_match_len = len(matches)
                 
+            # If we have no characters left, try and generate a token
             else:
-                # print('no chars')
+
+                # If we dont have any matches or anything in the buffer, we don't have a supported character for our language
                 if not matches and buffer:
                     STDERR('ERROR: invalid token')
                     break
-                # print(matches,buffer)
-                token = consumeToken(matches, LEXEMES, valid_tokens)
+
+                # Generate one token given all the matches we found so far
+                token = generateToken(matches, LEXEMES, valid_tokens)
                 STDOUT(f'LEXER > {token}-[{token.value}] on line {token.line_num}')
                 tokens.append(token)
+
+                # Keep track of how long our token was to remove its characters from the buffer
                 indexes_to_del = len(tokens[-1].value)
 
-                
-
-                # print('!!!!!!!!!!deleting:', buffer[0:indexes_to_del])
-
-                if buffer[0:indexes_to_del] == '"':
+                # If we are removing a quote, toggle the function to enable/disable whitespace matching for characters
+                if buffer[0:indexes_to_del][0] == '"':
                     valid_tokens = switchCharRegex(valid_tokens)
 
+                # Purge those indexes wherein the characters of the token are apart of
                 del buffer[0:indexes_to_del]
+
+                
+                # Prepend whatever's left in the buffer to start this whole process again
                 characters = buffer + characters
-                # print("{{{remaining chars: ", characters)
+
+                # Reset our buffer and found matches
                 buffer = []
                 matches = []
-
-                # print('-----Made a token & clearing buffer')
-                # print('-----tokens:', tokens)
-                # print('-------------------------------------')
-                # print(characters,matches)
