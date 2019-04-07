@@ -8,7 +8,8 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
     if [ ! -d "$gutecENV" ]; then
         python3 -m venv ./gutecENV
     fi
-    source ./gutecENV/bin/activate
+    source gutecENV/bin/activate
+    which python
     cd src
     pip install --editable .
     cd ..

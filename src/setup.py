@@ -5,7 +5,7 @@ setup(
     name='gutec',
     version='0.1',
     py_modules=['cli'],
-    install_requires=['Click'],
+    install_requires=['Click', 'treelib'],
     entry_points='''
         [console_scripts]
         gutec=cli:cli
