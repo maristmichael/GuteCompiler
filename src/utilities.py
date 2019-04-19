@@ -117,4 +117,6 @@ def printSymbolTable(symbol_table):
 
     for var in vars:
         details = symbol_table.ids[var]
+        table.append_row([var, *details])
+   
     print(table)

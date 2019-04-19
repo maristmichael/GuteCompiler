@@ -540,5 +540,4 @@ def analyze(cst_nodes, program_num):
         [STDWARN(warning) for warning in semantic_warnings]
         
     STDWARN(f'\nProgram {program_num} symbol table:')
-    # printSymbolTabl
     printSymbolTable(*symbol_table)
