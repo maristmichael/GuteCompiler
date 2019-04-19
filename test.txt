@@ -1,1 +1,26 @@
-{int a}$
+/*Test case for all productions - thx Tien*/
+{
+    /*IntDeclaration*/
+    int a
+    int b
+    string s
+    boolean z
+    z=true
+    s="kai sucks"
+    a=0
+    b=0
+    /*WhileLoop*/
+    while(a!=3){
+        print(a)
+        while(b!=3){
+            print(b)
+            b=1+b
+            if(b==2){
+                /*PrintStatement*/
+                print("kai sucks"/*Thiswilldonothing*/)
+            }
+        }
+        b=0
+        a=1+a
+    }
+}$

@@ -74,3 +74,29 @@ def tokenKinds():
         'T_digit',
         'T_char'
     ))
+
+def tokenKindLiteral(token_kind):
+    d = {
+        'T_k_if':'if',
+        'T_k_int':'int',
+        'T_k_true':'true',
+        'T_k_false': 'false',
+        'T_k_while':'while',
+        'T_k_print':'print',
+        'T_k_string':'string',
+        'T_k_boolean':'boolean',
+        'T_eof':'$',
+        'T_quote':'"',
+        'T_assign':'=',
+        'T_l_brace':'{',
+        'T_r_brace':'}',
+        'T_l_paren':'(',
+        'T_r_paren':')',
+        'T_intop_add':'+',
+        'T_boolop_eq':'==',
+        'T_boolop_ineq':'!=',
+        'T_id':'ID',
+        'T_digit':'Digit',
+        'T_char': 'Char'
+    }
+    return d[token_kind]

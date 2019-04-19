@@ -1,9 +1,9 @@
 from tokens import *
 from utilities import *
-from utilities import STDWARN,STDERR
 import re
 
 def guteLex(program):
+    STDOUT(f'LEXER:')
 
     buffer = []
     tokens = []
@@ -24,13 +24,16 @@ def guteLex(program):
     tokenize = set(('$','"','{','}','(',')','=','==','!='))
     program = program.translate({ord('\t'): '  ', ord('\r'): '\n'})
 
+    def parseError(error_message):
+        STDERR(f'Lexer Error: {error_message} | Line: {curr_line}')
+
     
     program = [*program]
 
     while program or buffer:
         if not program:
             if not matches:
-                STDERR('Invalid Character')
+                parseError(f'Invalid Character {repr(buffer[0])}')
                 return
                 
             token = spawnToken(matches, token_kinds, valid_tokens,curr_line)
@@ -55,9 +58,11 @@ def guteLex(program):
         if f'{next_char}{next_next_char}' in comment_block:
             comment_mode = not comment_mode
             del program[0]
-            continue
-            
+            continue 
+
         if comment_mode:
+            if next_char == newline:
+                curr_line += 1
             continue
 
         if next_char == whitespace and not string_mode:
@@ -65,7 +70,7 @@ def guteLex(program):
                 continue
             
             if not matches:
-                STDERR('Invalid Character')
+                parseError(f'Invalid Character {repr(buffer[0])}')
                 return
 
             token = spawnToken(matches, token_kinds, valid_tokens, curr_line)
@@ -89,7 +94,7 @@ def guteLex(program):
                 continue
 
             if not matches:
-                STDERR('Invalid Character')
+                parseError(f'Invalid Character {repr(buffer[0])}')
                 return
 
             token = spawnToken(matches, token_kinds, valid_tokens, curr_line)
@@ -117,7 +122,7 @@ def guteLex(program):
         if buffer and next_char in tokenize:
             # Make a token
             if not matches:
-                STDERR('Invalid Character')
+                parseError(f'Invalid Character {repr(buffer[0])}')
                 return
 
             token = spawnToken(matches, token_kinds,valid_tokens, curr_line)
@@ -145,10 +150,13 @@ def guteLex(program):
             matches.append(match)
 
     if string_mode:
-        STDERR('Unterminated string at: ')
+        parseError('Unterminated string')
         return
     if comment_mode:
-        STDWARN('Unterminated comment at: ')
+        parseError('Unterminated comment')
+
     return tokens
+
+
 
 

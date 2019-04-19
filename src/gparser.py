@@ -1,290 +1,315 @@
 from treelib import Node, Tree
-from tokens import tokenKinds
-from utilities import STDERR,STDOUT,STDWARN
+from tokens import tokenKinds, tokenKindLiteral
+from utilities import STDERR, STDOUT, STDWARN
 
 
 def guteParse(token_stream, program_num):
+    STDOUT(f'PARSER:')
     token_kinds = tokenKinds()
     cst = Tree()
-    curr_node = cst.create_node('Root')
+    parse_error = False
+    curr_node = cst.create_node('<Program>')
     curr_token = 0
 
     def parseProgram(program_num):
         nonlocal cst, curr_node
-        curr_node = cst.create_node(f'Program {program_num}', parent=curr_node.identifier)
         parseBlock()
         matchConsume('T_eof')
         endChildren()
 
-
     def parseBlock():
         nonlocal cst, curr_node
+        _print('Block')
+        curr_node = cst.create_node('<Block>', parent=curr_node.identifier)
 
-        print('Block')
-        curr_node = cst.create_node('Block', parent=curr_node.identifier)
-        # print(cst.parent(curr_node.identifier))
-        matchConsume('T_l_brace') 
+        matchConsume('T_l_brace')
         parseStatementList()
         matchConsume('T_r_brace')
         endChildren()
 
-
     def parseStatementList():
         nonlocal cst, curr_node
-        print('Statement List')
+        _print('Statement List')
 
-        curr_node = cst.create_node('Statement List', parent=curr_node.identifier)
+        curr_node = cst.create_node(
+            '<Statement List>', parent=curr_node.identifier)
 
-        if token_stream[curr_token].type_ in ('T_k_if', 'T_k_while', 'T_k_print', 'T_id', 'T_k_int', 'T_k_boolean', 'T_k_string', 'T_l_brace'):
+        if match('T_k_if') or match('T_k_while') or match('T_k_print') or match('T_id') or match('T_k_int') or match('T_k_boolean') or match('T_k_string') or match('T_l_brace'):
             parseStatement()
-
-        endChildren()
-
-        if token_stream[curr_token].type_ in ('T_k_if', 'T_k_while', 'T_k_print', 'T_id', 'T_k_int', 'T_k_boolean', 'T_k_string', 'T_l_brace'):
             parseStatementList()
         else:
-            print('empty production')
+            pass
+        endChildren()
 
 
     def parseStatement():
-        nonlocal cst, curr_node
-        print('Statement')
+        nonlocal cst, curr_node, token_stream
+        _print('Statement')
+        curr_node = cst.create_node('<Statement>', parent=curr_node.identifier)
 
-        curr_node = cst.create_node('Statement', parent=curr_node.identifier)
-
-        if token_stream[curr_token].type_ == 'T_k_print':
+        if match('T_k_print'):
             parsePrint()
 
-        elif token_stream[curr_token].type_ == 'T_k_id':
+        elif match('T_id'):
             parseAssignment()
-        
-        elif token_stream[curr_token].type_ in ('T_k_int', 'T_k_boolean', 'T_k_string'):
+
+        elif match('T_k_int') or match('T_k_boolean') or match('T_k_string'):
             parseVarDecl()
-        
-        elif token_stream[curr_token].type_ == 'T_k_while':
+
+        elif match('T_k_while'):
             parseWhile()
 
-        elif token_stream[curr_token].type_ == 'T_k_if':
+        elif match('T_k_if'):
             parseIf()
-        elif token_stream[curr_token].type_ == 'T_l_brace':
+
+        elif match('T_l_brace'):
             parseBlock()
+
+        else:
+            parseError(
+                f'Expected if, while, print, ID, int, boolean, string or block')
 
         endChildren()
 
     def parsePrint():
         nonlocal cst, curr_node
-        print('Print Statement')
+        _print('Print Statement')
 
-        curr_node = cst.create_node('Print Statement', parent=curr_node.identifier)
+        curr_node = cst.create_node(
+            '<Print Statement>', parent=curr_node.identifier)
         matchConsume('T_k_print')
-        matchConsume('T_l_brace')
+        matchConsume('T_l_paren')
         parseExpr()
-        matchConsume('T_r_brace')
+        matchConsume('T_r_paren')
         endChildren()
-
-
 
     def parseAssignment():
         nonlocal cst, curr_node
-        print('Assignment Statement')
+        _print('Assignment Statement')
 
-        curr_node = cst.create_node('Assignment Statement', parent=curr_node.identifier)
-        matchConsume('T_id')
+        curr_node = cst.create_node(
+            '<Assignment Statement>', parent=curr_node.identifier)
+        parseID()
         matchConsume('T_assign')
         parseExpr()
         endChildren()
-
 
     def parseVarDecl():
         nonlocal cst, curr_node
         print('Variable Decleration')
 
-        curr_node = cst.create_node('Variable Decleration', parent=curr_node.identifier)
-        if token_stream[curr_token].type_ in ('T_k_int', 'T_k_boolean', 'T_k_string'):
-            parseType()
-        else:
-            print('var decl error')
-
-        if token_stream[curr_token].type_ in ('T_id'):
-            parseID()
-        else:
-            print('var decl error')
-
+        curr_node = cst.create_node(
+            '<Variable Decleration>', parent=curr_node.identifier)
+        parseType()
+        parseID()
         endChildren()
-
 
     def parseWhile():
         nonlocal cst, curr_node
-        print('While Statement')
+        _print('While Statement')
 
-        curr_node = cst.create_node('While Statement', parent=curr_node.identifier)
+        curr_node = cst.create_node(
+            '<While Statement>', parent=curr_node.identifier)
         matchConsume('T_k_while')
         parseBooleanExpr()
         parseBlock()
         endChildren()
 
-
     def parseIf():
         nonlocal cst, curr_node
         print('If Statement')
 
-        curr_node = cst.create_node('If Statement', parent=curr_node.identifier)
+        curr_node = cst.create_node(
+            '<If Statement>', parent=curr_node.identifier)
         matchConsume('T_k_if')
 
         parseBooleanExpr()
         parseBlock()
         endChildren()
 
-
     def parseExpr():
         nonlocal cst, curr_node
-        print('Expression')
+        _print('Expression')
 
-        curr_node = cst.create_node('Expr', parent=curr_node.identifier)
-        if token_stream[curr_token].type_ == 'T_digit':
+        curr_node = cst.create_node('<Expr>', parent=curr_node.identifier)
+        if match('T_digit'):
             parseIntExpr()
-        elif token_stream[curr_token].type_ == 'T_l_paren':
+        elif match('T_l_paren'):
             parseBooleanExpr()
-        elif token_stream[curr_token].type_ == 'T_k_true' or token_stream[curr_token].type_ == 'T_k_false':
+        elif match('T_k_true') or match('T_k_false'):
             parseBooleanExpr()
-        elif token_stream[curr_token].type_ == 'T_quote':
+        elif match('T_quote'):
             parseStringExpr()
-        elif token_stream[curr_token].type_ == 'T_id':
+        elif match('T_id'):
             parseID()
         else:
-            pass
-            # print('bad')
+            parseError('Expected Int, Bool, String Expressions or an ID')
 
         endChildren()
 
-
     def parseIntExpr():
         nonlocal cst, curr_node
-        print('Int Expression')
+        _print('Int Expression')
 
-        curr_node = cst.create_node('Int Expr', parent=curr_node.identifier)
-        if matchConsume('T_digit') and matchConsume('T_intop_add'):
+        curr_node = cst.create_node('<Int Expr>', parent=curr_node.identifier)
+        if match('T_digit'):
             parseDigit()
+
+        if match('T_intop_add'):
             parseIntOp()
             parseExpr()
-
-        elif matchConsume('T_digit'):
-            parseDigit()
 
         endChildren()
 
     def parseStringExpr():
         nonlocal cst, curr_node
-        print('String Expression')
+        _print('String Expression')
 
-        curr_node = cst.create_node('String Expr', parent=curr_node.identifier)
+        curr_node = cst.create_node('<String Expr>', parent=curr_node.identifier)
         matchConsume('T_quote')
+
+        curr_node = cst.create_node('<Char List>', parent=curr_node.identifier)
+        _print('Char List')
         parseCharList()
+        endChildren()
+
         matchConsume('T_quote')
         endChildren()
 
     def parseBooleanExpr():
         nonlocal cst, curr_node
-        print('Boolean Expression')
+        _print('Boolean Expression')
 
-        curr_node = cst.create_node('Boolean Expr', parent=curr_node.identifier)
-        if matchConsume('T_l_paren'):
+        curr_node = cst.create_node('<Boolean Expr>', parent=curr_node.identifier)
+        if match('T_l_paren'):
+            matchConsume('T_l_paren')
             parseExpr()
             parseBoolOp()
             parseExpr()
             matchConsume('T_r_paren')
 
-        elif matchConsume('T_k_true') or matchConsume('T_k_false'):
+        elif match('T_k_true') or match('T_k_false'):
             parseBoolVal()
+
+        else:
+            parseError('Expected "(", true, or false')
 
         endChildren()
 
     def parseID():
-        nonlocal cst, curr_node,token_stream,curr_token
-        print(f'ID')
+        nonlocal cst, curr_node
+        _print('ID')
 
-        curr_node = cst.create_node('ID', parent=curr_node.identifier)
-        matchConsume('T_id')
+        curr_node = cst.create_node('<ID>', parent=curr_node.identifier)
+        if match('T_id'):
+            matchConsume('T_id')
+        else:
+            parseError(f'Expected {tokenKindLiteral("T_id")}')
+
         endChildren()
 
     def parseCharList():
         nonlocal cst, curr_node
-        print('Char List')
 
-        curr_node = cst.create_node('Char List', parent=curr_node.identifier)
-
-        if token_stream[curr_token].type_ == 'T_char':
+        if match('T_char'):
             parseChar()
-        else:
-            pass
-            # print('bad char list')
-        endChildren()
-
-    def parseType():
-        if matchConsume('T_k_int'):
-            print(f'int')
-            return True
-        if matchConsume('T_k_string'):
-            print('string')
-
-            return True
-        if matchConsume('T_k_boolean'):
-            print('boolean')
-
-            return True
-        else:
-            pass
-            # print('bad type parse')
-
-    def parseChar():
-        print(f'T_char')
-        if matchConsume('T_char'):
             parseCharList()
         else:
             pass
-            print('BAD char')
 
+    def parseType():
+        nonlocal cst, curr_node
+        _print('Type')
+        curr_node = cst.create_node('<Type>', parent=curr_node.identifier)
+
+        if match('T_k_int'):
+            matchConsume('T_k_int')
+        elif match('T_k_string'):
+            matchConsume('T_k_string')
+        elif matchConsume('T_k_boolean'):
+            matchConsume('T_k_boolean')
+        else:
+            pass
+        endChildren()
+
+    def parseChar():
+        nonlocal cst, curr_node
+        _print('Character')
+
+        curr_node = cst.create_node('<Char>', parent=curr_node.identifier)
+
+        if matchConsume('T_char'):
+            pass
+        else:
+            pass
+
+        endChildren()
 
     def parseDigit():
+        nonlocal curr_node
+        curr_node = cst.create_node('<Digit>', parent=curr_node.identifier)
+        _print('Digit')
         if matchConsume('T_digit'):
-            pass
+            return
         else:
             pass
-            print('bad digit parse')
+
+        endChildren()
 
     def parseBoolOp():
-        if matchConsume('T_boolop_eq') or matchConsume('T_boolop_ineq'):
-            pass
+        nonlocal cst, curr_node
+        _print('Boolean Operation')
+
+        curr_node = cst.create_node('<Bool Op>', parent=curr_node.identifier)
+
+        if match('T_boolop_eq'):
+            matchConsume('T_boolop_eq')
+        elif match('T_boolop_ineq'):
+            matchConsume('T_boolop_ineq')
         else:
-            pass
-            print('bad bool op parse')
+            parseError(f'Expected == or !=')
+
+        endChildren()
 
     def parseBoolVal():
-        if matchConsume('T_k_true') or matchConsume('T_k_false'):
-            pass
+        nonlocal cst, curr_node
+        _print('Boolean Value')
+        curr_node = cst.create_node(
+            '<BooleanVal>', parent=curr_node.identifier)
+        if match('T_k_true'):
+            matchConsume('T_k_true')
+        if match('T_k_false'):
+            matchConsume('T_k_false')
         else:
             pass
-            print('bad bool val parse')
+        endChildren()
 
     def parseIntOp():
-        if matchConsume('T_intop_add'):
-            pass
+        nonlocal cst, curr_node
+        _print('Integer Operation')
+        curr_node = cst.create_node('<Int Op>', parent=curr_node.identifier)
+        if match('T_intop_add'):
+            matchConsume('T_intop_add')
         else:
             pass
-            print('bad intop parse')
+        endChildren()
+
+    def match(to_match):
+        nonlocal cst, curr_token, token_kinds, token_stream, curr_node
+
+        if token_stream[curr_token].type_ == to_match and to_match in token_kinds:
+            return True
+
+        return False
 
     def matchConsume(to_match):
         nonlocal cst, curr_token, token_kinds, token_stream, curr_node
-        # print('trying to match', to_match)
 
         if token_stream[curr_token].type_ == to_match and to_match in token_kinds:
-            print(token_stream[curr_token])
-            cst.create_node(f'{token_stream[curr_token]}', parent=curr_node.identifier)
+            cst.create_node(f'[ {token_stream[curr_token]} ]',parent=curr_node.identifier, data=token_stream[curr_token])
             curr_token += 1
-
-        else: 
-            pass
-            # print('nah')
+        else:
+            parseError(f'Expected "{tokenKindLiteral(to_match)}"')
 
     def endChildren():
         nonlocal curr_node
@@ -292,7 +317,16 @@ def guteParse(token_stream, program_num):
         if cst.get_node(curr_node.bpointer):
             curr_node = cst.parent(curr_node.identifier)
 
-    # def 
+    def parseError(error_message):
+        nonlocal curr_token, token_stream, parse_error
+        STDERR(
+            f'Parse Error: {error_message} | Found "{token_stream[curr_token]}" on line {token_stream[curr_token].line_num}')
+        parse_error = True
+
+    def _print(message):
+        nonlocal parse_error
+        if not parse_error:
+            print(message)
 
     parseProgram(program_num)
-    return cst
+    return cst, parse_error
