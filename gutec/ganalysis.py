@@ -109,10 +109,16 @@ def makeAST(cst_nodes, program_num):
             while not value_.data:
                 value_ = ast.children(value_.identifier)[0]
 
+
             id_scope = checkScopeLevel(var_)
 
             var_type = symbol_table[id_scope].checkType(var_)
             value_type = value_.data.type_
+
+            if value_type == 'T_id':
+                value_type = checkType(value_.data.value)
+
+            print(value_type)
 
             if var_type != value_type:
                 scopeError(f'type mismatch, var {var_} cannot equal "{value_.data}"', line_)
@@ -193,12 +199,12 @@ def makeAST(cst_nodes, program_num):
 
                 scope_used = 0
 
-                if checkInit(var_):
-                    scope_used = checkUsed(var_)
-                else:
+                if not checkInit(var_):
+                #     scope_used = checkUsed(var_)
+                # else:
                     scopeWarning(f'variable {var_} has not been initialized',line_)
 
-                symbol_table[scope_used].used(var_)
+                symbol_table[id_scope].used(var_)
             else:
                 pass
 
@@ -302,7 +308,7 @@ def makeAST(cst_nodes, program_num):
                 right = right.data.type_
 
             if left != right:
-                scopeError(f'type mismatch, {left} cannot equal {right}==',_line)
+                scopeError(f'type mismatch, {left} cannot equal {right}',_line)
 
             endChildren()
             matchNode(cst_nodes[curr_cst_node].data.type_, 'T_r_paren')
@@ -477,6 +483,17 @@ def makeAST(cst_nodes, program_num):
 
         if id_used:
             return id_used[-1]
+        return False
+
+    def checkType(id):
+        nonlocal symbol_table, curr_scope
+
+        id_used = [_scope.checkType(id) for _scope in symbol_table[::-1] if _scope.checkExists(id)]
+
+        print(id_used,'||')
+
+        if id_used:
+            return id_used[0]
         return False
 
     def checkScopeLevel(id):

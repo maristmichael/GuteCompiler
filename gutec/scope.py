@@ -16,19 +16,24 @@ class gScope:
         return False
 
     def checkType(self, name):
-        print(name,'---')
         if bool(self.ids):
-            return self.ids[name][0]
+            b = self.ids.get(name, False)
+            if b:
+                return b[0]
         return False
 
     def checkInit(self, name):
         if bool(self.ids):
-            return self.ids[name][1]
+            b = self.ids.get(name, False)
+            if b:
+                return b[1]
         return False
 
     def checkUsed(self, name):
         if bool(self.ids):
-            return self.ids[name][2]
+            b = self.ids.get(name, False)
+            if b:
+                return b[2]
         return False
 
     def init(self, name):
