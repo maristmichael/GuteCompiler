@@ -1,0 +1,22 @@
+{
+    int a
+    int b
+    string s
+    boolean z
+    z=true
+    s="test suckssss"
+    a=0
+    b=0
+    while(a!=3){
+        print(a)
+        while(b!=3){
+            print(b)
+            b=1+b
+            if(b==2){
+                print("test sucksssss")
+            }
+        }
+        b=0
+        a=1+a
+    }
+}$
