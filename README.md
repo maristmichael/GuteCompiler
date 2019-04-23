@@ -8,7 +8,12 @@ The language used is follows [this grammar specification](./grammar.pdf).
 - Python3.7
 
 ## Setting up the Compiler
-In a terminal or command line, navigate to the directory of the project
+
+If you don't feel like dowloading the project itself, you can simple run:
+
+``` python3 -m venv ./gutecENV; source ./gutecENV/bin/activate; pip3 install gutec; ```
+
+And skip to 'Running the Compiler' otherwise, you can follow the commands below.
 
 1. Setup the project requirements and create the environment:
 
@@ -33,6 +38,4 @@ Compile a file:
 
     ```deactivate```
 
-2. Clean the directory of the env
-
-    ```make clean```
+2. Delete the guteENV virtual environment directory
