@@ -102,9 +102,7 @@ def makeAST(cst_nodes, program_num):
         value_ = id_info[1]
         line_ = id_info[0].data.line_num
 
-        var_exists = checkID(var_)
-
-        if var_exists is not False:
+        if checkID(var_) is not False:
             
             while not value_.data:
                 value_ = ast.children(value_.identifier)[0]
@@ -118,12 +116,11 @@ def makeAST(cst_nodes, program_num):
             if value_type == 'T_id':
                 value_type = checkType(value_.data.value)
 
-            print(value_type)
-
             if var_type != value_type:
                 scopeError(f'type mismatch, var {var_} cannot equal "{value_.data}"', line_)
+
+            symbol_table[id_scope].init(var_)
                 
-            checkInit(var_)
         else:
             scopeError(f'variable "{var_}" has not been declared', line_)
 
@@ -163,7 +160,7 @@ def makeAST(cst_nodes, program_num):
 
         id_exists = checkID(name_)
 
-        if not id_exists:
+        if id_exists is False:
             _print(f'Added var {name_}:({type_})')
             curr_scope.new_id(name_,type_,line_)
         elif id_exists is not False and id_exists != curr_scope:
@@ -192,21 +189,16 @@ def makeAST(cst_nodes, program_num):
             var_info = ast.children(curr_node.identifier)
             var_ = var_info[0].data.value
 
-
-            if checkID(var_):
+            if checkID(var_) is not False:
                 id_scope = checkScopeLevel(var_)
                 line_ = symbol_table[id_scope].getLineNum(var_)
 
-                scope_used = 0
-
-                if not checkInit(var_):
-                #     scope_used = checkUsed(var_)
-                # else:
-                    scopeWarning(f'variable {var_} has not been initialized',line_)
+                if symbol_table[id_scope].checkInit is False:
+                    scopeWarning(f'variable {var_} has not been initialized',var_info[0].data.line_num)
 
                 symbol_table[id_scope].used(var_)
             else:
-                pass
+                scopeError(f'variable "{var_}" has not been declared', var_info[0].data.line_num)
 
         elif cst_nodes[curr_cst_node].data and match(cst_nodes[curr_cst_node].data.type_, 'T_l_paren'):
             parseBooleanExpr()
@@ -471,7 +463,6 @@ def makeAST(cst_nodes, program_num):
 
         id_init = [_scope.getLineNum(id) for _scope in symbol_table[::-1] if _scope.checkInit(id)]
 
-        print(id_init)
         if id_init:
             return id_init[-1]
         return False
@@ -489,8 +480,6 @@ def makeAST(cst_nodes, program_num):
         nonlocal symbol_table, curr_scope
 
         id_used = [_scope.checkType(id) for _scope in symbol_table[::-1] if _scope.checkExists(id)]
-
-        print(id_used,'||')
 
         if id_used:
             return id_used[0]

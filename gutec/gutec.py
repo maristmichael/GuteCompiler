@@ -1,4 +1,3 @@
-# import lexer
 import sys,time
 from treelib import Node
 from gutec.glexer import guteLex
@@ -48,11 +47,8 @@ def guteCompile(i, program):
     printTree(cst)
     STDOUT(f'PARSED PROGRAM SUCCESSFULLY\n')
 
-    # [print(f'{cst.level(cst.get_node(i))-1*"  "}{cst.get_node(i).tag}') for i in cst.expand_tree()]
     cst_nodes = getInorderList(cst, cst.get_node(cst.root), [])
-    # for n in cst_nodes:
-    #     print(n.tag)
-
+    
     analyze(cst_nodes, i)
 
 

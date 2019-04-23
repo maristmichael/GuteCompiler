@@ -42,7 +42,7 @@ class gScope:
         self.ids[name] = update_var
 
     def used(self, name):
-        update_var = (self.ids[name][0], True,self.ids[name][2],  self.ids[name][3])
+        update_var = (self.ids[name][0],self.ids[name][1], True,  self.ids[name][3])
         del self.ids[name]
         self.ids[name] = update_var
 
