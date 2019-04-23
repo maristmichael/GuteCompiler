@@ -104,7 +104,7 @@ def makeAST(cst_nodes, program_num):
 
         var_exists = checkID(var_)
 
-        if var_exists:
+        if var_exists is not False:
             
             while not value_.data:
                 value_ = ast.children(value_.identifier)[0]
@@ -156,7 +156,11 @@ def makeAST(cst_nodes, program_num):
         line_ = id_info[1].data.line_num
 
         id_exists = checkID(name_)
+
         if not id_exists:
+            _print(f'Added var {name_}:({type_})')
+            curr_scope.new_id(name_,type_,line_)
+        elif id_exists is not False and id_exists != curr_scope:
             _print(f'Added var {name_}:({type_})')
             curr_scope.new_id(name_,type_,line_)
         else:
@@ -450,28 +454,29 @@ def makeAST(cst_nodes, program_num):
     def checkID(id):
         nonlocal symbol_table
 
-        id_exists = [_scope.getLineNum(id) for _scope in symbol_table[::-1] if _scope.checkExists(id)]
+        id_exists = [checkScopeLevel(id) for _scope in symbol_table[::-1] if _scope.checkExists(id)]
 
         if id_exists:
-            return id_exists[0] 
+            return id_exists[-1] 
         return False
 
     def checkInit(id):
         nonlocal symbol_table, curr_scope
 
-        id_init = [scope.getLineNum(id) for scope in symbol_table[::-1] if scope.checkInit(id)]
+        id_init = [_scope.getLineNum(id) for _scope in symbol_table[::-1] if _scope.checkInit(id)]
 
+        print(id_init)
         if id_init:
-            return id_init[0]
+            return id_init[-1]
         return False
 
     def checkUsed(id):
         nonlocal symbol_table, curr_scope
 
-        id_used = [scope.getLineNum(id) for scope in symbol_table[::-1] if scope.checkUsed(id)]
+        id_used = [_scope.getLineNum(id) for _scope in symbol_table[::-1] if _scope.checkUsed(id)]
 
         if id_used:
-            return id_used[0]
+            return id_used[-1]
         return False
 
     def checkScopeLevel(id):
@@ -492,8 +497,6 @@ def makeAST(cst_nodes, program_num):
             if not curr_scope.checkUsed(var):
                 line_ = curr_scope.getLineNum(var)
                 scopeWarning(f'variable {var} has not been used', line_)
-
-        pass
     
     def _print(message):
         nonlocal semantic_error

@@ -16,6 +16,7 @@ class gScope:
         return False
 
     def checkType(self, name):
+        print(name,'---')
         if bool(self.ids):
             return self.ids[name][0]
         return False
