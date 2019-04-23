@@ -1,11 +1,10 @@
 # import lexer
-import time
-import sys
+import sys,time
 from treelib import Node
-from lexer import guteLex
-from gparser import guteParse
-from semantic_analysis import analyze
-from utilities import STDWARN, STDOUT, STDERR, dividePrograms, removeComments, printTree, getInorderList
+from gutec.glexer import guteLex
+from gutec.gparser import guteParse
+from gutec.ganalysis import analyze
+from gutec.utilities import *
 
 
 def main():

@@ -1,5 +1,5 @@
-from tokens import *
-from utilities import *
+from gutec.tokens import *
+from gutec.utilities import *
 import re
 
 def guteLex(program):

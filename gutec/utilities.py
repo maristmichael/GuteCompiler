@@ -1,9 +1,8 @@
-import re
+import re,click
 from beautifultable import BeautifulTable
 from operator import itemgetter
-from tokens import *
-from lexer import *
-import click
+from gutec.tokens import *
+from gutec.glexer import *
 
 # Given an input string of programs, split it by the eof symbol ($) and return them as a list
 

@@ -1,21 +1,38 @@
 # GuteCompiler
 ## Overview
-This is a compiler that will be built from scratch using Python3.
+This is a compiler built from scratch using Python3.
+The language used is follows [this grammar specification](./grammar.pdf).
+
 
 ## Requirements
 - Python3.7
 
-## Running the Compiler
+## Setting up the Compiler
 In a terminal or command line, navigate to the directory of the project
 
-Give executable permissions to the setup.sh file with `chmod +x setup.sh` to make life easy for you
+1. Setup the project requirements and create the environment:
 
-Run the command `. ./setup.sh` for a quick Python3.7 version check, and installation
+    ```make``` 
 
-After all that magic, you're ready to use my compiler
+2. Workon the python virtual environment
 
-Type `gutec -f path_to_a_file` to compile a file
+    ``` `./activate.sh` ```  (includes accents)
 
-To exit the virtual environment, type `deactivate`
 
-As of now, the compiler can only perform lexical analysis but more will come...
+## Running up the Compiler
+
+After all that magic, you're ready to use my compiler.
+
+Compile a file:
+
+```gutec path_to_a_file```
+
+## Cleanup
+
+1. Exit the virtual environment
+
+    ```deactivate```
+
+2. Clean the directory of the env
+
+    ```make clean```

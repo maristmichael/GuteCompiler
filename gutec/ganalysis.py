@@ -1,7 +1,7 @@
 from treelib import Node, Tree
-from scope import gScope
-from tokens import Token
-from utilities import STDERR, STDOUT, STDWARN, printTree, traverseInorder, printSymbolTable
+from gutec.scope import gScope
+from gutec.tokens import Token
+from gutec.utilities import *
 
 
 def makeAST(cst_nodes, program_num):

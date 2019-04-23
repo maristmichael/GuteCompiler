@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 import click
-import gutec
-from utilities import STDERR
-
+from gutec import gutec
 def cli():
     gutec.main()
     

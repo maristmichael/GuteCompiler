@@ -1,6 +1,6 @@
 from treelib import Node, Tree
-from tokens import tokenKinds, tokenKindLiteral
-from utilities import STDERR, STDOUT, STDWARN
+from gutec.tokens import tokenKinds, tokenKindLiteral
+from gutec.utilities import STDERR, STDOUT, STDWARN
 
 
 def guteParse(token_stream, program_num):
