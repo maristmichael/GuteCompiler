@@ -116,6 +116,9 @@ def makeAST(cst_nodes, program_num):
             if value_type == 'T_id':
                 value_type = checkType(value_.data.value)
 
+                if checkID(value_.data.value) is False:
+                    scopeError(f'variable {value_.data} has not been declared', value_.data.line_num)
+                    
             if var_type != value_type:
                 scopeError(f'type mismatch, var {var_} cannot equal "{value_.data}"', line_)
 
