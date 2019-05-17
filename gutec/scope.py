@@ -3,7 +3,7 @@ class gScope:
     def __init__(self):
         self.ids = {}
 
-    # ID attributes: name, type, isInitialized?, isUsed?, line_number
+    # ID attributes: name: type, isInitialized?, isUsed?, line_number
     def new_id(self, name, type_, line_num):
         self.ids[name] = (type_, False, False,line_num)
 
@@ -11,38 +11,32 @@ class gScope:
         return self.ids[name][3]
 
     def checkExists(self, name):
-        if bool(self.ids):
+        if bool(self.ids) and self.ids.get(name, None) is not None:
             return name in self.ids.keys()
         return False
 
     def checkType(self, name):
-        if bool(self.ids):
-            b = self.ids.get(name, False)
-            if b:
-                return b[0]
+        if bool(self.ids) and self.ids.get(name, None) is not None:
+            return self.ids[name][0]
         return False
 
     def checkInit(self, name):
-        if bool(self.ids):
-            b = self.ids.get(name, False)
-            if b:
-                return b[1]
+        if bool(self.ids) and self.ids.get(name, None) is not None:
+            return self.ids[name][1]
         return False
 
     def checkUsed(self, name):
-        if bool(self.ids):
-            b = self.ids.get(name, False)
-            if b:
-                return b[2]
+        if bool(self.ids) and self.ids.get(name, None) is not None:
+            return self.ids[name][2]
         return False
 
     def init(self, name):
-        update_var = (self.ids[name][0], True, self.ids[name][2],  self.ids[name][3])
+        update_var = (self.ids[name][0], True, self.ids[name][2], self.ids[name][3])
         del self.ids[name]
         self.ids[name] = update_var
 
     def used(self, name):
-        update_var = (self.ids[name][0],self.ids[name][1], True,  self.ids[name][3])
+        update_var = (self.ids[name][0], self.ids[name][1],True, self.ids[name][3])
         del self.ids[name]
         self.ids[name] = update_var
 
